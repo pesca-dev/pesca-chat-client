@@ -31,6 +31,8 @@ export class TUI {
     private username: string;
     private password: string;
 
+    private history: string[] = [];
+
     private constructor(address: string, username: string, password: string) {
         terminal.dim(`Connecting to ${address}\n`);
         this.client = new Client(address);
@@ -94,10 +96,12 @@ export class TUI {
             const line = await terminal.inputField({
                 cursorPosition: 0,
                 autoComplete: Object.keys(TUI.commands).map(c => `${TUI.commandPrefix}${c}`),
-                autoCompleteMenu: true
+                autoCompleteMenu: true,
+                history: this.history
             }).promise;
             terminal.eraseLine().column(1);
             if (line) {
+                this.history.push(line);
                 const invocation = TUI.commandPattern.exec(line)?.groups;
                 if (invocation) {
                     const command = TUI.commands[invocation.name];
