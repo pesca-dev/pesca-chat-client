@@ -12,6 +12,7 @@
     "license": "ISC",
     "devDependencies": {
         "@types/argparse": "^1.0.38",
+        "@types/terminal-kit": "^1.28.2",
         "@types/ws": "^7.2.4",
         "socket-chat-protocol": "git+https://git.bre4k3r.de/dev-bre4k3r/socket-chat/socket-chat-protocol.git",
         "tslint": "^6.1.2",
@@ -21,6 +22,7 @@
     "dependencies": {
         "argparse": "^1.0.10",
         "logsen": "^2.0.1",
+        "terminal-kit": "^1.35.2",
         "ws": "^7.2.5"
     }
 }
