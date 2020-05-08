@@ -1,17 +1,26 @@
 {
-    "name": "typescript-template",
+    "name": "socket-chat-client",
     "version": "1.0.0",
-    "description": "A simple TypeScript template.",
+    "description": "The official CLI client of our socket chat app.",
     "main": "build/index.js",
     "scripts": {
         "start": "node .",
         "build": "tsc",
-        "build:start": "npm run build && npm run start"
+        "build:start": "npm run build && npm run start",
+        "watch": "tsc -w"
     },
     "license": "ISC",
     "devDependencies": {
+        "@types/argparse": "^1.0.38",
+        "@types/ws": "^7.2.4",
+        "socket-chat-protocol": "git+https://git.bre4k3r.de/dev-bre4k3r/socket-chat/socket-chat-protocol.git",
         "tslint": "^6.1.2",
         "tslint-config-prettier": "^1.18.0",
         "typescript": "^3.8.3"
+    },
+    "dependencies": {
+        "argparse": "^1.0.10",
+        "logsen": "^2.0.1",
+        "ws": "^7.2.5"
     }
 }
