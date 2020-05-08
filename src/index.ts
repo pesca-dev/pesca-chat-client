@@ -1,6 +1,6 @@
+import { ArgumentParser } from "argparse";
 import { terminal } from "terminal-kit";
 import { Client } from "./client";
-import { ArgumentParser } from "argparse";
 
 const parser = new ArgumentParser({
     addHelp: true,
@@ -21,7 +21,7 @@ parser.addArgument(["-a", "--address"], {
 async function main(): Promise<void> {
     const args = parser.parseArgs();
     const client = new Client(args.address);
-    
+
     terminal.on("key", (name: string) => {
         if (name === "CTRL_C") {
             terminal.grabInput(false);
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     })
 
     client.on("ready", () => {
-        console.log(`Logging in as ${args.username}...`);
+        terminal.dim(`Logging in as ${args.username}...\n`);
         client.send("server/login-request", [{
             username: args.username,
             password: args.password
@@ -39,13 +39,13 @@ async function main(): Promise<void> {
 
     client.on("server/login-response", async resp => {
         if (resp.success) {
-            console.log("Ready!");
+            terminal.green("Ready!\n");
             client.on("channel/send-message", (...msgs) => {
                 for (const msg of msgs) {
                     terminal.magenta(`<${msg.author}@${msg.channel}> ${msg.content}\n`);
                 }
             });
-            
+
             // Enter REPL
             while (true) {
                 const line = await terminal.inputField({
@@ -61,7 +61,7 @@ async function main(): Promise<void> {
                 }
             }
         } else {
-            console.log(`Login was unsuccessful: ${JSON.stringify(resp)}`);
+            terminal.red(`Login was unsuccessful: ${JSON.stringify(resp)}\n`);
         }
     })
 }
