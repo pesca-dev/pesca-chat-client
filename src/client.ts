@@ -1,5 +1,5 @@
-import * as proto from "socket-chat-protocol";
 import { EventEmitter } from "events";
+import * as proto from "socket-chat-protocol";
 import WebSocket from "ws";
 
 export declare interface Client {
@@ -12,22 +12,21 @@ export class Client extends EventEmitter {
 
     constructor(address: string) {
         super();
-        console.log(`Connecting to ${address}`);
         this.ws = new WebSocket(address);
         this.bind();
     }
-    
+
     /** Bind events. */
     private bind(): void {
         this.ws.on("open", () => this.emit("ready"));
         this.ws.on("message", data => {
             // TODO: Handle non-string messages
-            let message: proto.Server.EventObject<any> = JSON.parse(data.toString());
+            const message: proto.Server.EventObject<any> = JSON.parse(data.toString());
             this.emit(message.method, ...message.params);
         });
     }
-    
-    send<K extends keyof proto.Server.Event>(method: K, params: proto.Server.Event[K]) {
+
+    public send<K extends keyof proto.Server.Event>(method: K, params: proto.Server.Event[K]): void {
         this.ws.send(JSON.stringify({ method, params }));
     }
 }
