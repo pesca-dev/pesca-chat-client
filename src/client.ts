@@ -16,7 +16,7 @@ export class Client extends EventEmitter {
         this.bind();
     }
 
-    /** Bind events. */
+    /** Registers event listeners. */
     private bind(): void {
         this.ws.on("open", () => this.emit("ready"));
         this.ws.on("message", data => {
@@ -26,7 +26,21 @@ export class Client extends EventEmitter {
         });
     }
 
-    public send<K extends keyof proto.Server.Event>(method: K, params: proto.Server.Event[K]): void {
-        this.ws.send(JSON.stringify({ method, params }));
+    /** Strongly typed version of `sendAny`. */
+    public async send<K extends keyof proto.Server.Event>(method: K, params: proto.Server.Event[K]): Promise<void> {
+        await this.sendAny(method, params);
+    }
+
+    /** Sends a message to the web socket. */
+    public async sendAny(method: string, params: any): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.ws.send(JSON.stringify({ method, params }), err => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 }
