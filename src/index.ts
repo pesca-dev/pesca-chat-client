@@ -19,8 +19,8 @@ parser.addArgument(["-a", "--address"], {
 
 async function main(): Promise<void> {
     const args = parser.parseArgs();
-    const tui = new TUI(args.address, args.username, args.password);
-    tui.run();
+    const tui = await TUI.connect(args.address, args.username, args.password);
+    await tui.run();
 }
 
 main().catch(e => console.error(e));

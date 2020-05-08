@@ -2,52 +2,63 @@ import { terminal } from "terminal-kit";
 import { Client } from "./client";
 
 /**
- * The terminal UI.
+ * A terminal UI.
  */
 export class TUI {
+    /**
+     * Creates a new terminal UI and asynchronously connects
+     * with the given credentials to the given address.
+     * Resolves once the connection is in a ready state.
+     */
+    public static async connect(address: string, username: string, password: string): Promise<TUI> {
+        const tui = new TUI(address, username, password);
+        await tui.bind();
+        return tui;
+    }
+
     private client: Client;
     private username: string;
     private password: string;
 
-    public constructor(address: string, username: string, password: string) {
+    private constructor(address: string, username: string, password: string) {
         terminal.dim(`Connecting to ${address}\n`);
         this.client = new Client(address);
         this.username = username;
         this.password = password;
-        this.bind();
     }
 
-    private bind(): void {
-        terminal.on("key", (name: string) => {
-            if (name === "CTRL_C") {
-                terminal.grabInput(false);
-                setTimeout(() => process.exit(), 100);
-            }
-        })
+    private async bind(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            terminal.on("key", (name: string) => {
+                if (name === "CTRL_C") {
+                    terminal.grabInput(false);
+                    setTimeout(() => process.exit(), 100);
+                }
+            })
 
-        this.client.on("ready", () => {
-            terminal.dim(`Logging in as ${this.username}...\n`);
-            this.client.send("server/login-request", [{
-                username: this.username,
-                password: this.password
-            }]);
+            this.client.on("ready", () => {
+                terminal.dim(`Logging in as ${this.username}...\n`);
+                this.client.send("server/login-request", [{
+                    username: this.username,
+                    password: this.password
+                }]);
+            });
+
+            this.client.on("server/login-response", async resp => {
+                if (resp.success) {
+                    terminal.green("Ready!\n");
+                    this.client.on("channel/send-message", (...msgs) => {
+                        for (const msg of msgs) {
+                            terminal.magenta(`<${msg.author}@${msg.channel}> ${msg.content}\n`);
+                        }
+                    });
+                    resolve();
+                } else {
+                    terminal.red(`Login was unsuccessful: ${JSON.stringify(resp)}\n`);
+                    reject(resp);
+                }
+            })
         });
-
-        this.client.on("server/login-response", async resp => {
-            if (resp.success) {
-                terminal.green("Ready!\n");
-                this.client.on("channel/send-message", (...msgs) => {
-                    for (const msg of msgs) {
-                        terminal.magenta(`<${msg.author}@${msg.channel}> ${msg.content}\n`);
-                    }
-                });
-
-                // Enter REPL
-                this.run();
-            } else {
-                terminal.red(`Login was unsuccessful: ${JSON.stringify(resp)}\n`);
-            }
-        })
     }
 
     public async run(): Promise<void> {
